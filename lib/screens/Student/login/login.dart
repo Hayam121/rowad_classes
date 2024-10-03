@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rowad_classes/constants/colors.dart';
 import 'package:rowad_classes/cubit/auth_cubit.dart';
+import 'package:rowad_classes/screens/Student/NavBar/navBar.dart';
 import 'package:rowad_classes/screens/Student/login/forgetpassword.dart';
 
 class LoginPage extends StatefulWidget {  // اجعلها StatefulWidget
@@ -137,10 +138,28 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.all(10),
       ),
       onPressed: () {
-        BlocProvider.of<AuthCubit>(context).login(
-          emailController.text,
-          passwordController.text,
-        );
+       //  Navigator.push(context, MaterialPageRoute(builder: (context)=>NavBar()));
+       onPressed: () async {
+  final email = emailController.text;
+  final password = passwordController.text;
+
+  try {
+    // Attempt to log in
+    await BlocProvider.of<AuthCubit>(context).login(email, password);
+    
+    // If login is successful, navigate to the home page
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => NavBar()),
+    );
+  } catch (error) {
+    // If there is an error, show a snackbar with the error message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Login failed: $error')),
+    );
+  }
+};
+
       },
       child: const Align(
         alignment: Alignment.center,

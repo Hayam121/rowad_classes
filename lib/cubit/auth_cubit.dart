@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rowad_classes/data/api_client.dart';
@@ -46,13 +48,13 @@ class AuthCubit extends Cubit<AuthState> {
   required String lname,
   required String mname,
   required String gender,
-  required int phone,
+  required String phone,
   required String religion,
   required String nationalId,
   required String confirmPassword,
   String? trainingCourse,
   DateTime? dateOfBirth,
-  required int province, // تأكد من أن province موجود هنا
+  required String province, // تأكد من أن province موجود هنا
 }) async {
   emit(AuthLoading());
   try {
@@ -77,31 +79,42 @@ class AuthCubit extends Cubit<AuthState> {
     } else {
       throw ServerException('Registration failed');
     }
-  } on ServerException catch (e) {
-    emit(AuthFailure('Server error: ${e.message}'));
-  } catch (e) {
-    emit(AuthFailure('Unexpected error: $e'));
+  } on NetworkException catch (e) {
+      emit(AuthFailure('Network error: ${e.message}'));
+    } on ServerException catch (e) {
+      emit(AuthFailure('Server error: ${e.message}'));
+    } catch (e) {
+      emit(AuthFailure('Unexpected error: $e'));
+    }
+}
+
+
+
+  Future<void> fetchAllCourses() async {
+  final response = await apiClient.get(Endpoints.getAllCourses);
+  
+  // Print the entire response data
+  print('Response data: ${json.encode(response.data)}');
+
+  if (response.statusCode == 200) {
+    // Accessing the 'success' key from the response data
+    final List<dynamic> courseData = response.data['success'];
+
+    // Convert to List<Map<String, dynamic>>
+    List<Map<String, dynamic>> courses = courseData.map((course) => {
+      'id': course['id'].toString(), // Ensure id is a string
+      'name': course['name'] as String // Cast name to String
+    }).toList();
+
+    // Emit loaded courses
+    emit(CoursesLoaded(courses)); // This should now work
+  } else {
+    // Print error message if status code is not 200
+    print('Error: ${response.statusMessage}');
+    emit(CoursesError(response.statusMessage ?? 'An unknown error occurred'));
   }
 }
 
-Future<List<Map<String, String>>> fetchAllCourses() async {
-  try {
-    final response = await apiClient.get(Endpoints.getAllCourses);
-    if (response.statusCode == 200) {
-      // تحويل البيانات إلى قائمة من الخرائط مع 'id' و 'name'
-      return List<Map<String, String>>.from(
-        response.data.map((course) => {
-          'id': course['id'].toString(), // تأكد من أن 'id' هو المفتاح الصحيح
-          'name': course['courseName'],   // تأكد من أن 'courseName' هو المفتاح الصحيح
-        }),
-      );
-    } else {
-      throw ServerException('Failed to load courses');
-    }
-  } catch (e) {
-    throw Exception('Error fetching courses: $e');
-  }
-}
 
 
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rowad_classes/screens/Student/courses/courses.dart';
+import 'package:rowad_classes/screens/Student/login/login.dart';
 import 'package:rowad_classes/screens/Student/register/RegisterStudent.dart';
 import 'package:rowad_classes/screens/Teacher/Register/register.dart';
 import 'package:rowad_classes/constants/colors.dart';
@@ -27,7 +28,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => Courses()),
+                    MaterialPageRoute(builder: (_) => LoginPage()),
                   );
                 },
                 child: Text(
